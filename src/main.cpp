@@ -83,7 +83,7 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, nrChannels;
-    unsigned char *data = stbi_load("../Resource/texture/512.png", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load("../Resource/texture/lucy.png", &width, &height, &nrChannels, 0);
     if (data) {
         GLenum format;
         if (nrChannels == 1)
