@@ -1,6 +1,6 @@
 // src/main.cpp
+#include <glad/glad.h>
 
-#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <cmath>
@@ -8,10 +8,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
+#include "Camera.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 
 int main() {
+    // Initialize GLFW
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW\n";
         return -1;
@@ -24,11 +26,16 @@ int main() {
         return -1;
     }
 
+    // Tell GLFW to capture our mouse
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     glfwMakeContextCurrent(window);
 
-    glewExperimental = GL_TRUE;
-    if (glewInit() != GLEW_OK) {
-        std::cerr << "Failed to initialize GLEW\n";
+    // glad: load all OpenGL function pointers
+    // ---------------------------------------
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        std::cerr << "Failed to initialize GLAD\n";
         return -1;
     }
 
@@ -81,6 +88,9 @@ int main() {
     // Create shader program
     Shader ourShader("../shaders/default.vert", "../shaders/default.frag");
 
+    // Create camera object
+    Camera camera(800, 600, glm::vec3(0.0f, 0.0f, 10.0f));
+
     // Load texture
     GLuint texture;
     glGenTextures(1, &texture);
@@ -114,13 +124,18 @@ int main() {
 
     // Main loop
     while (!glfwWindowShouldClose(window)) {
-        // Enables the Depth Buffer
-        glEnable(GL_DEPTH_TEST);
-
         // Specify the color of the background
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
         // Clean the back buffer and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Enables the Depth Buffer
+        glEnable(GL_DEPTH_TEST);
+
+        // Handles camera inputs
+        camera.Inputs(window);
+        // Updates and exports the camera matrix to the Vertex Shader
+        camera.Matrix(45.0f, 0.1f, 100.0f, ourShader, "camMatrix");
 
         ourShader.use();
         glActiveTexture(GL_TEXTURE0); // Activate texture unit 0
@@ -139,20 +154,12 @@ int main() {
             prevTime = crntTime;
         }
 
-        // Initializes matrices so they are not the null matrix
         glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = glm::mat4(1.0f);
-        glm::mat4 proj = glm::mat4(1.0f);
-
         // Assigns different transformations to each matrix
         model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-        view = glm::translate(view, glm::vec3(0.0f, -0.5f, -2.0f));
-        proj = glm::perspective(glm::radians(45.0f), (float)800 / 600, 0.1f, 100.0f);
 
         // Outputs the matrices into the Vertex Shader
         ourShader.setMat4("model", model);
-        ourShader.setMat4("view", view);
-        ourShader.setMat4("proj", proj);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
