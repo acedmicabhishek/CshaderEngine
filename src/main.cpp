@@ -5,6 +5,8 @@
 #include <iostream>
 #include <cmath>
 #include "Shader.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
 
 int main() {
     if (!glfwInit()) {
@@ -12,7 +14,7 @@ int main() {
         return -1;
     }
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Calcium3D Triangle", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Calcium3D", nullptr, nullptr);
     if (!window) {
         std::cerr << "Failed to create GLFW window\n";
         glfwTerminate();
@@ -27,13 +29,13 @@ int main() {
         return -1;
     }
 
-    // Triangle vertices
+    // Triangle vertices with texture coordinates
     float vertices[] = {
-        // Coordinates for a rectangle
-        0.5f,  0.5f, 0.0f,  // Top Right
-        0.5f, -0.5f, 0.0f,  // Bottom Right
-        -0.5f, -0.5f, 0.0f,  // Bottom Left
-        -0.5f,  0.5f, 0.0f   // Top Left
+        // Positions          // Texture Coords
+        0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // Top Right
+        0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // Bottom Right
+        -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, // Bottom Left
+        -0.5f,  0.5f, 0.0f,  0.0f, 1.0f  // Top Left
     };
 
     GLuint indices[] =
@@ -42,39 +44,63 @@ int main() {
         1, 2, 3  // Second Triangle
     };
 
-    GLuint VAO, VBO, EBO; // unsigned int that is referenced to the GL
-    glGenVertexArrays(1, &VAO); // same as new keyword to create an empty obj
-    glGenBuffers(1, &VBO); // same thing
+    GLuint VAO, VBO, EBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
-    // Bind VAO
-    glBindVertexArray(VAO); // Bind the VAO — from now on, all vertex attribute settings will be stored in it
+    glBindVertexArray(VAO);
 
-    // Copy vertex data into VBO
-    glBindBuffer(GL_ARRAY_BUFFER, VBO); 
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // Link VBO to vertex shader attribute 0
-    // Bind the EBO specifying it's a GL_ELEMENT_ARRAY_BUFFER
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    // Introduce the indices into the EBO
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    // Configure the Vertex Attribute so that OpenGL knows how to read the VBO
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    // Enable the Vertex Attribute so that OpenGL knows to use it
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    // Texture coordinate attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
-    // Bind both the VBO and VAO to 0 so that we don't accidentally modify the VAO and VBO we created
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-    // Bind the EBO to 0 so that we don't accidentally modify it
-    // NEED TO MAKE SURE TO UNBIND IT AFTER UNBINDING THE VAO, as the EBO is linked in the VAO
-    // This does not apply to the VBO because the VBO is already linked to the VAO during glVertexAttribPointer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     // Create shader program
     Shader ourShader("../shaders/default.vert", "../shaders/default.frag");
+
+    // Load texture
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // Set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // Set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load("../Resource/texture/512.png", &width, &height, &nrChannels, 0);
+    if (data) {
+        GLenum format;
+        if (nrChannels == 1)
+            format = GL_RED;
+        else if (nrChannels == 3)
+            format = GL_RGB;
+        else if (nrChannels == 4)
+            format = GL_RGBA;
+        else
+            format = GL_RGB; // fallback
+
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+        std::cout << "Failed to load texture: ../Resource/texture/512.png" << std::endl;
+    }
+    stbi_image_free(data);
 
     // Main loop
     while (!glfwWindowShouldClose(window)) {
@@ -82,10 +108,14 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         ourShader.use();
+        glActiveTexture(GL_TEXTURE0); // Activate texture unit 0
+        glBindTexture(GL_TEXTURE_2D, texture); // Bind the texture
+        ourShader.setInt("ourTexture", 0); // Set texture uniform to texture unit 0
 
-        // Update scale uniform for pulsation
+        // Update time uniform for pulsation
         float time = glfwGetTime();
         ourShader.setFloat("time", time);
+
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -98,6 +128,7 @@ int main() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
+    glDeleteTextures(1, &texture); // Delete the texture
     // The Shader class handles program deletion
 
     glfwDestroyWindow(window);
