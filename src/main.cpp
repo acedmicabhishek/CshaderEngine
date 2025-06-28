@@ -4,25 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <cmath>
-#include "shader_utils.h"
-
-// Vertex shader source
-const char* vertexShaderSource = R"glsl(
-#version 330 core
-layout (location = 0) in vec3 aPos;
-void main() {
-    gl_Position = vec4(aPos, 1.0);
-}
-)glsl";
-
-// Fragment shader source
-const char* fragmentShaderSource = R"glsl(
-#version 330 core
-out vec4 FragColor;
-void main() {
-    FragColor = vec4(0.2, 0.8, 0.3, 1.0);
-}
-)glsl";
+#include "Shader.h"
 
 int main() {
     if (!glfwInit()) {
@@ -92,14 +74,20 @@ int main() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     // Create shader program
-    GLuint shaderProgram = createShaderProgram(vertexShaderSource, fragmentShaderSource);
+    Shader ourShader("../shaders/default.vert", "../shaders/default.frag");
 
     // Main loop
     while (!glfwWindowShouldClose(window)) {
         glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
+        ourShader.use();
+
+        // Update scale uniform for pulsation
+        float time = glfwGetTime();
+        float scale = (sin(time) + 1.0f) / 2.0f * 0.5f + 0.75f; // Pulsate between 0.75 and 1.25
+        ourShader.setFloat("scale", scale);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -111,7 +99,7 @@ int main() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shaderProgram);
+    // The Shader class handles program deletion
 
     glfwDestroyWindow(window);
     glfwTerminate();
