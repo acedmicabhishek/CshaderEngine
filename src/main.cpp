@@ -85,8 +85,7 @@ int main() {
 
         // Update scale uniform for pulsation
         float time = glfwGetTime();
-        float scale = (sin(time) + 1.0f) / 2.0f * 0.5f + 0.75f; // Pulsate between 0.75 and 1.25
-        ourShader.setFloat("scale", scale);
+        ourShader.setFloat("time", time);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
