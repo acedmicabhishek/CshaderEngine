@@ -1,7 +1,7 @@
 #include"Camera.h"
 #include <glad/glad.h>
 
-Camera::Camera(int width, int height, glm::vec3 position)
+Camera::Camera(int width, int height, glm::vec3 position) : m_cameraEnabled(true)
 {
 	Camera::width = width;
 	Camera::height = height;
@@ -25,6 +25,27 @@ void Camera::Matrix(float FOVdeg, float nearPlane, float farPlane, Shader& shade
 
 void Camera::Inputs(GLFWwindow* window)
 {
+	// Toggle camera on/off with ESC key
+	// Handles mouse inputs
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+	{
+		if (!m_cameraEnabled) {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			m_cameraEnabled = true;
+			firstClick = true;
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		if (m_cameraEnabled) {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			m_cameraEnabled = false;
+		}
+	}
+
+	if (!m_cameraEnabled) {
+		return;
+	}
+
 	// Handles key inputs
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
@@ -59,14 +80,6 @@ void Camera::Inputs(GLFWwindow* window)
 		speed = 0.1f;
 	}
 
-	// Handles mouse inputs - now responds to any mouse movement
-	// Hide cursor and lock it to center for FPS-style camera
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	}else {
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	}
 
 	// Prevents camera from jumping on the first frame
 	if (firstClick)
@@ -99,5 +112,7 @@ void Camera::Inputs(GLFWwindow* window)
 	Orientation = glm::rotate(Orientation, glm::radians(-rotY), Up);
 
 	// Sets mouse cursor to the middle of the screen so that it doesn't end up roaming around
-	glfwSetCursorPos(window, (width / 2), (height / 2));
+	if (m_cameraEnabled) { // Only set cursor position if camera is enabled
+		glfwSetCursorPos(window, (width / 2), (height / 2));
+	}
 }

@@ -26,6 +26,9 @@ public:
 	int width;
 	int height;
 
+	// Stops the camera from moving when the cursor is unlocked
+	bool m_cameraEnabled;
+
 	// Adjust the speed of the camera and it's sensitivity when looking around
 	float speed = 0.5f;
 	float sensitivity = 16.0f;
