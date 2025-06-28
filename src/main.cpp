@@ -142,23 +142,29 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, texture); // Bind the texture
         ourShader.setInt("ourTexture", 0); // Set texture uniform to texture unit 0
 
-        // Variables that help the rotation of the pyramid
-        float rotation = 0.0f;
-        double prevTime = glfwGetTime();
+        // Get current time for shader animations
+        float time = (float)glfwGetTime();
+        ourShader.setFloat("time", time);
 
-        // Simple timer
-        double crntTime = glfwGetTime();
-        if (crntTime - prevTime >= 1 / 60)
-        {
-            rotation += 0.5f;
-            prevTime = crntTime;
-        }
+        // Set uniform values for rotation and pulsing
+        float rotationSpeed = 0.5f; // Adjust for desired spin speed
+        float scaleSpeed = 1.0f; // Adjust for desired pulse speed
+        float scaleAmount = 0.1f; // Adjust for desired pulse magnitude
+        ourShader.setFloat("rotationSpeed", rotationSpeed);
+        ourShader.setFloat("scaleSpeed", scaleSpeed);
+        ourShader.setFloat("scaleAmount", scaleAmount);
+
+        // Set uniform values for rainbow effect
+        float rainbowSpeed = 0.1f; // Adjust for desired rainbow speed
+        float rainbowDensity = 0.5f; // Adjust for desired color band density
+        ourShader.setFloat("rainbowSpeed", rainbowSpeed);
+        ourShader.setFloat("rainbowDensity", rainbowDensity);
 
         glm::mat4 model = glm::mat4(1.0f);
-        // Assigns different transformations to each matrix
-        model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, time * rotationSpeed, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate around Y-axis
+        float pulse = 1.0f + sin(time * scaleSpeed) * scaleAmount;
+        model = glm::scale(model, glm::vec3(pulse));
 
-        // Outputs the matrices into the Vertex Shader
         ourShader.setMat4("model", model);
 
         glBindVertexArray(VAO);
