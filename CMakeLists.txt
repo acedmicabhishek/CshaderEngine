@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Include directories
-include_directories(include src)
+include_directories(include)
 
 # Find required packages
 find_package(OpenGL REQUIRED)
@@ -16,6 +16,7 @@ pkg_check_modules(GLEW REQUIRED glew)
 # Set sources
 set(SOURCES
     src/main.cpp
+    src/Shader.cpp
 )
 
 # Create executable
