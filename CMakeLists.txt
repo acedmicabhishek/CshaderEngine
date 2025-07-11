@@ -19,6 +19,10 @@ set(SOURCES
     src/Shader.cpp
     src/Camera.cpp
     src/glad.c  # Include glad source file
+    src/VAO.cpp
+    src/VBO.cpp
+    src/EBO.cpp
+    src/Texture.cpp
 )
 
 # Create executable
