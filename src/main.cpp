@@ -165,9 +165,11 @@ int main() {
     glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
 
-    // Texture
-    Texture brickTex("../Resource/texture/lucy.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    brickTex.texUnit(shaderProgram, "tex0", 0);
+    // Textures
+    Texture diffuseTex("../Resource/texture/planks.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    diffuseTex.texUnit(shaderProgram, "tex0", 0);
+    Texture specTex("../Resource/texture/planksSpec.png", GL_TEXTURE_2D, GL_TEXTURE1, GL_RED, GL_UNSIGNED_BYTE);
+    specTex.texUnit(shaderProgram, "tex1", 1);
 
     // Enables the Depth Buffer
     glEnable(GL_DEPTH_TEST);
@@ -195,7 +197,8 @@ int main() {
         // Export the camMatrix to the Vertex Shader of the pyramid
         camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
         // Binds texture so that is appears in rendering
-        brickTex.Bind();
+        diffuseTex.Bind();
+        specTex.Bind();
         // Bind the VAO so OpenGL knows to use it
         VAO1.Bind();
         // Draw primitives, number of indices, datatype of indices, index of indices
@@ -225,7 +228,8 @@ int main() {
     VAO1.Delete();
     VBO1.Delete();
     EBO1.Delete();
-    brickTex.Delete();
+    diffuseTex.Delete();
+    specTex.Delete();
     //shaderProgram.Delete();
     lightVAO.Delete();
     lightVBO.Delete();
