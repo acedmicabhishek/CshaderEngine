@@ -25,7 +25,7 @@ int main() {
         return -1;
     }
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Calcium3D", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1920, 1080, "CshaderEngine", nullptr, nullptr);
     if (!window) {
         std::cerr << "Failed to create GLFW window\n";
         glfwTerminate();
@@ -68,7 +68,7 @@ int main() {
     quadVAO.Unbind();
     quadVBO.Unbind();
 
-    Shader fractalShader("../shaders/fractal.vert", "../shaders/fractal.frag");
+    Shader mainShader("../shaders/main.vert", "../shaders/main.frag");
 
     // Enables the Depth Buffer
     glEnable(GL_DEPTH_TEST);
@@ -87,11 +87,14 @@ int main() {
         // Handles camera inputs
         camera.Inputs(window);
 
-        fractalShader.use();
-        glUniform2f(glGetUniformLocation(fractalShader.ID, "iResolution"), 800.0f, 600.0f);
-        glUniform1f(glGetUniformLocation(fractalShader.ID, "iTime"), glfwGetTime());
-        glUniform3f(glGetUniformLocation(fractalShader.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
-        camera.Matrix(45.0f, 0.1f, 100.0f, fractalShader, "camMatrix");
+        mainShader.use();
+        glUniform2f(glGetUniformLocation(mainShader.ID, "iResolution"), 800.0f, 600.0f);
+        glUniform1f(glGetUniformLocation(mainShader.ID, "iTime"), glfwGetTime());
+        double mouseX, mouseY;
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+        glUniform2f(glGetUniformLocation(mainShader.ID, "iMouse"), (float)mouseX, (float)mouseY);
+        glUniform3f(glGetUniformLocation(mainShader.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+        camera.Matrix(45.0f, 0.1f, 100.0f, mainShader, "camMatrix");
 
         quadVAO.Bind();
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -105,7 +108,7 @@ int main() {
     // Delete all the objects we've created
     quadVAO.Delete();
     quadVBO.Delete();
-    fractalShader.Delete();
+    mainShader.Delete();
 
     glfwDestroyWindow(window);
     glfwTerminate();
