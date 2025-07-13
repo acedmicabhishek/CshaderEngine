@@ -1,4 +1,3 @@
-// src/main.cpp
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
@@ -48,8 +47,6 @@ int main() {
         return -1;
     }
 
-    // Triangle vertices with texture coordinates
-    // Vertices coordinates
 
     GLfloat quadVertices[] = {
         // Positions   // TexCoords
@@ -79,9 +76,31 @@ int main() {
     // Creates camera object
     Camera camera(800, 600, glm::vec3(0.0f, 0.0f, 2.0f));
 
+    // Variables to keep track of the time for the FPS counter
+    double prevTime = 0.0;
+    double crntTime = 0.0;
+    double timeDiff;
+    unsigned int counter = 0;
+
     // Main while loop
     while (!glfwWindowShouldClose(window))
     {
+        // Updates counter and times
+        crntTime = glfwGetTime();
+        timeDiff = crntTime - prevTime;
+        counter++;
+
+        if (timeDiff >= 1.0) // Update FPS every second
+        {
+            // Creates new title
+            std::string FPS = std::to_string((double)counter / timeDiff);
+            std::string ms = std::to_string((timeDiff / (double)counter) * 1000);
+            std::string newTitle = "Calcium3D - " + FPS + "FPS / " + ms + "ms";
+            glfwSetWindowTitle(window, newTitle.c_str());
+            prevTime = crntTime;
+            counter = 0;
+        }
+
         // Specify the color of the background
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
         // Clean the back buffer and depth buffer
