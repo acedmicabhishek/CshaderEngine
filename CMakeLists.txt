@@ -7,18 +7,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Include directories
 include_directories(include include/stb include/glm include/glad)
 
-# Find required packages
-find_package(OpenGL REQUIRED)
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GLFW REQUIRED glfw3)
-pkg_check_modules(GLEW REQUIRED glew)
+# # Find required packages
+# find_package(OpenGL REQUIRED)
+# find_package(PkgConfig REQUIRED)
+# pkg_check_modules(GLFW REQUIRED glfw3)
+# pkg_check_modules(GLEW REQUIRED glew)
 
 # Set sources
 set(SOURCES
     src/main.cpp
     src/Shader.cpp
     src/Camera.cpp
-    src/glad.c  # Include glad source file
+    src/glad.c
     src/VAO.cpp
     src/VBO.cpp
     src/EBO.cpp
