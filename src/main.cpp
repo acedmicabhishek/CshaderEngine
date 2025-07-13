@@ -18,6 +18,8 @@
 
 #include "Shader.h"
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+
 int main() {
     // Initialize GLFW
     if (!glfwInit()) {
@@ -36,6 +38,7 @@ int main() {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -88,7 +91,9 @@ int main() {
         camera.Inputs(window);
 
         mainShader.use();
-        glUniform2f(glGetUniformLocation(mainShader.ID, "iResolution"), 800.0f, 600.0f);
+        int currentWidth, currentHeight;
+        glfwGetFramebufferSize(window, &currentWidth, &currentHeight);
+        glUniform2f(glGetUniformLocation(mainShader.ID, "iResolution"), (float)currentWidth, (float)currentHeight);
         glUniform1f(glGetUniformLocation(mainShader.ID, "iTime"), glfwGetTime());
         double mouseX, mouseY;
         glfwGetCursorPos(window, &mouseX, &mouseY);
@@ -113,4 +118,8 @@ int main() {
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
 }
