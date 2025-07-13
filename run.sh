@@ -18,5 +18,5 @@ cmake ..
 echo "[🔨] Building project..."
 make
 
-echo "[🚀] Running calcium3d..."
-./calcium3d
+echo "[🚀] Running CshaderEngine..."
+./CshaderEngine
