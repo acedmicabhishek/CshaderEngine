@@ -47,4 +47,4 @@ target_link_directories(CshaderEngine PRIVATE
 )
 
 # Optional: enable compiler warnings
-target_compile_options(CshaderEngine PRIVATE -Wall -Wextra -pedantic)
+# target_compile_options(CshaderEngine PRIVATE -Wall -Wextra -pedantic)
