@@ -202,9 +202,6 @@ void main()
 	vec2 oriuv=uv;
 	uv.y*=iResolution.y/iResolution.x;
 	vec2 mouse=(iMouse/iResolution.xy-.5)*3.;
-	// The original code had a placeholder for iMouse.z, which is not available in a vec2.
-	// Assuming this was meant to provide a default mouse state when no input is given.
-	// For now, we will use the iMouse directly. If mouse button input is needed, a separate uniform would be required.
 	float fov=.9-max(0.,.7-iTime*.3);
 	vec3 dir=normalize(vec3(uv*fov,1.));
 	dir.yz*=rot(mouse.y);
