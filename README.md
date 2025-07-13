@@ -1,2 +1,4 @@
 # Under development
-- rewriting the renderer
+
+write your shader in `main.frag/vert`
+and run with `./run.sh`
